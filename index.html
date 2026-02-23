@@ -1,28 +1,67 @@
 <!DOCTYPE html>
-<html>
-<body>
-
-<p>Haz click en la imagen:</p>
-
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>PWA Service Worker Demo</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        img  { display: block; margin: 12px 0; cursor: pointer; border: 2px solid #ccc; border-radius: 8px; }
+        button { margin: 4px; padding: 8px 16px; cursor: pointer; }
+        #status { margin-top: 10px; font-size: 0.9em; color: #444; }
+    </style>
+</head>
 <script>
-const img = new Image();
+    const img = new Image();
+    navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('SW registrado!', reg))
+        .catch(err => console.log(err));
 
-navigator.serviceWorker.register('sw.js');
+    setTimeout(() => {
+        img.src = 'dog.svg';
+        document.body.appendChild(img);
+    }, 3000);
 
-setTimeout(() => {
-  img.src = 'dog.svg'; 
-  document.body.appendChild(img);
-}, 3000);
+    // ── Funcionalidad 1: cambiar dog → cat al hacer clic ─────────────────────
+    img.addEventListener('click', () => {
+        if (navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({ action: 'switchToCat' });
+            if (img.src.includes('cat.svg')) {
+                img.src = 'dog.svg';
+            } else {
+                img.src = 'cat.svg?t=' + Date.now();
+            }
+            console.log('Click en la imagen');
+        }
+    });
 
-img.addEventListener('click', () => {
-  navigator.serviceWorker.controller?.postMessage({
-    action: 'changeAnimal'
-  });
+    function sendMessage(action) {
+        if (navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({ action });
+        }
+    }
 
-  
-  img.src = 'dog.svg?' + Date.now();
-});
+    // ── Funcionalidad 2: bloqueo de imágenes SVG ──────────────────────────────
+    function toggleBloqueo() {
+        sendMessage('toggleBlock');
+        img.src = img.src.includes('?') ? img.src.split('?')[0] + '?t=' + Date.now() : img.src + '?t=' + Date.now();
+        document.getElementById('status').textContent = 'Bloqueo de imágenes alternado. Recarga la imagen para ver el efecto.';
+    }
+
+    // ── Funcionalidad 3: modo offline / caché primero ─────────────────────────
+    function toggleOffline() {
+        sendMessage('toggleOffline');
+        document.getElementById('status').textContent = 'Modo offline alternado. Las siguientes peticiones usarán caché primero.';
+    }
 </script>
 
+<body>
+    <p>Una imagen aparecerá en breves momentos (haz clic en ella para cambiarla):</p>
+
+    <div>
+        <button onclick="toggleBloqueo()">🚫 Activar / Desactivar bloqueo de imágenes</button>
+        <button onclick="toggleOffline()">📶 Activar / Desactivar modo offline (caché primero)</button>
+    </div>
+
+    <p id="status"></p>
 </body>
 </html>
