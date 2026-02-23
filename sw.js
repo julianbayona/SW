@@ -5,7 +5,7 @@ let changeImage = false;
 let currentIndex = 0; 
 
 self.addEventListener('install', event => {
-  console.log('SW installing');
+  console.log('SW installing modificated versionnnnnnn');
 
   self.skipWaiting();
 
