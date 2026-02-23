@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<p>Haz click en la imagen:</p>
+
+<script>
+const img = new Image();
+
+navigator.serviceWorker.register('sw.js');
+
+setTimeout(() => {
+  img.src = 'dog.svg'; 
+  document.body.appendChild(img);
+}, 3000);
+
+img.addEventListener('click', () => {
+  navigator.serviceWorker.controller?.postMessage({
+    action: 'changeAnimal'
+  });
+
+  
+  img.src = 'dog.svg?' + Date.now();
+});
+</script>
+
+</body>
+</html>
