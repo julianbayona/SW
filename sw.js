@@ -3,7 +3,7 @@ let useBlocked = false;
 let useOfflineMode = false;
 
 self.addEventListener('install', event => {
-    console.log('Service Worker instalando…');
+  console.log('SW installing modificated versionnnnnnn');
 
     // Precarga cat.svg y dog.svg en caché
     event.waitUntil(
